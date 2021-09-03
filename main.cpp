@@ -56,31 +56,44 @@ int main()
 
     while (!done)
     {
+        char cmd[50];
+        ssize_t sz;
         for (int az = lower_Az; (az <= upper_Az) && (!done); az++)
         {
             double idx = (az - lower_Az) * M_PI / 70; // 0 -- pi
             int el = (upper_El - lower_El) * sin(idx) + lower_El;
             printf("Az: %d deg, El: %d deg\n", az, el);
-            char cmd[50];
-            ssize_t sz = snprintf(cmd, sizeof(cmd), "PB%d\r", az);
+            
+            sz = snprintf(cmd, sizeof(cmd), "PB %d\r", az);
             if (write(fd, cmd, sz) < sz)
             {
                 printf("Error writing azimuth command\n");
             }
-            sz = snprintf(cmd, sizeof(cmd), "PA%d\r", el);
+            sz = snprintf(cmd, sizeof(cmd), "PA %d\r", el);
             if (write(fd, cmd, sz) < sz)
             {
-                printf("Error writing azimuth command\n");
+                printf("Error writing elevation command\n");
             }
             // if (!iteratedLast)
             //     fprintf(fp, "%d %d\n", az, el);
             sleep(2);
+        }
+        sz = sprintf(cmd, "PB %d\r", lower_Az);
+        if (write(fd, cmd, sz) < sz)
+        {
+            printf("Error writing azimuth command\n");
+        }
+        sz = sprintf(cmd, "PA %d\r", lower_El);
+        if (write(fd, cmd, sz) < sz)
+        {
+            printf("Error writing elevation command\n");
         }
         // if (iteratedLast == false)
         // {
         //     iteratedLast = true;
         //     fclose(fp);
         // }
+
         sleep(60);
     }
     close(fd);
