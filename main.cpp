@@ -54,10 +54,22 @@ int main()
 
     // FILE *fp = fopen("data.txt", "w");
 
+    char cmd[50];
+    ssize_t sz;
+    sz = sprintf(cmd, "PB %d\r", lower_Az);
+    if (write(fd, cmd, sz) < sz)
+    {
+        printf("Error writing azimuth command\n");
+    }
+    sleep(1);
+    sz = sprintf(cmd, "PA %d\r", lower_El);
+    if (write(fd, cmd, sz) < sz)
+    {
+        printf("Error writing elevation command\n");
+    }
+    sleep(30); 
     while (!done)
     {
-        char cmd[50];
-        ssize_t sz;
         for (int az = lower_Az; (az <= upper_Az) && (!done); az++)
         {
             double idx = (az - lower_Az) * M_PI / 70; // 0 -- pi
@@ -69,6 +81,7 @@ int main()
             {
                 printf("Error writing azimuth command\n");
             }
+            sleep(1);
             sz = snprintf(cmd, sizeof(cmd), "PA %d\r", el);
             if (write(fd, cmd, sz) < sz)
             {
@@ -76,7 +89,7 @@ int main()
             }
             // if (!iteratedLast)
             //     fprintf(fp, "%d %d\n", az, el);
-            sleep(2);
+            sleep(1);
         }
         sz = sprintf(cmd, "PB %d\r", lower_Az);
         if (write(fd, cmd, sz) < sz)
@@ -93,8 +106,20 @@ int main()
         //     iteratedLast = true;
         //     fclose(fp);
         // }
-
-        sleep(60);
+        for (int i = 0; (i < 60) && (!done); i++)
+            sleep(1);
+    }
+    sleep(1);
+    sz = sprintf(cmd, "PB %d\r", 0);
+    if (write(fd, cmd, sz) < sz)
+    {
+        printf("Error writing azimuth command\n");
+    }
+    sz = sprintf(cmd, "PA %d\r", 90);
+    sleep(1);
+    if (write(fd, cmd, sz) < sz)
+    {
+        printf("Error writing elevation command\n");
     }
     close(fd);
     return 0;
